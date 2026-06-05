@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KIRAN DENTAL LAB - Billing App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container" id="invoice">
+    <!-- Header -->
+    <div class="header">
+      <div class="heading">
+        <h1>KIRAN DENTAL LAB</h1>
+        <h2>INVOICE</h2>
+      </div>
+      <div class="logo">
+        <img src="assets/logo.png" alt="Company Logo" class="logo-img">
+      </div>
+    </div>
+    
+    <!-- Company Info -->
+    <div class="company-info">
+      <p><strong>Mobile:</strong> 9113305211 , 9973541682</p>
+      <p><strong>Address:</strong> PARK ROAD, KADAMKUA, PATNA - 800004</p>
+      <p><strong>Email:</strong> amitkumar40110@gmail.com</p>
+      <p><strong>Date:</strong> <input type="text" id="invoice_date" readonly></p>
+      <p><strong>Invoice No:</strong> <span id="invoice_no">INV-001</span></p>
+    </div>
+
+    <!-- Issued To -->
+    <div style="margin-top:20px;">
+      <label><strong>Issued To:</strong> 
+        <input type="text" name="issued_name" placeholder="Enter customer name" style="width:300px;">
+      </label>
+    </div>
+
+    <!-- Billing Table -->
+    <table id="billingTable">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Unit</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sno">1</td>
+          <td><input type="text" name="entry_date" placeholder="DD/MM/YY"></td>
+          <td><input type="text" name="description"></td>
+          <td><input type="number" name="unit"></td>
+          <td><input type="number" name="rate"></td>
+          <td><input type="number" name="amount" readonly></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Action buttons together -->
+    <button onclick="addRow()">Add Item</button>
+    <button onclick="removeLastRow()">Remove Last Item</button>
+
+    <!-- Summary -->
+    <div class="summary">
+      <p>Subtotal: <span id="subtotal">0</span></p>
+      <p>Back Dues: <input type="number" id="back_dues" value="0"></p>
+      <p><strong>Grand Total: <span id="grand_total">0</span></strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="qr-section">
+        <img src="assets/paymentQR.png" alt="Payment QR" class="qr">
+        <p>Scan to Pay</p>
+      </div>
+      <div class="actions">
+        <button onclick="printInvoice()">Print Invoice</button>
+        <button onclick="saveAsImage()">Save as JPG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- html2canvas library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- JavaScript -->
+  <script>
+    // Auto set invoice date
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0');
+    let yy = String(today.getFullYear()).slice(-2);
+    document.getElementById("invoice_date").value = dd + "/" + mm + "/" + yy;
+
+    // Invoice counter
+    let invoiceCounter = 1;
+
+    function calculate() {
+      let rows = document.querySelectorAll("#billingTable tbody tr");
+      let subtotal = 0;
+      for (let i = 0; i < rows.length; i++) {
+        let unit = rows[i].querySelector("input[name='unit']").value;
+        let rate = rows[i].querySelector("input[name='rate']").value;
+        let amountField = rows[i].querySelector("input[name='amount']");
+        let amount = (unit && rate) ? (unit * rate) : 0;
+        amountField.value = amount;
+        subtotal += amount;
+        // Update S.No
+        rows[i].querySelector(".sno").innerText = i + 1;
+      }
+      document.getElementById("subtotal").innerText = subtotal;
+      let backDues = parseFloat(document.getElementById("back_dues").value) || 0;
+      let grandTotal = subtotal + backDues;
+      document.getElementById("grand_total").innerText = grandTotal;
+    }
+
+    // Add Row
+    function addRow() {
+      let tableBody = document.querySelector("#billingTable tbody");
+      let rowCount = tableBody.rows.length;
+      let newRow = tableBody.insertRow();
+      newRow.innerHTML = `
+        <td class="sno">${rowCount + 1}</td>
+        <td><input type="text" name="entry_date" placeholder="DD/MM/YY"></td>
+        <td><input type="text" name="description"></td>
+        <td><input type="number" name="unit"></td>
+        <td><input type="number" name="rate"></td>
+        <td><input type="number" name="amount" readonly></td>
+      `;
+      newRow.querySelector("input[name='unit']").addEventListener("input", calculate);
+      newRow.querySelector("input[name='rate']").addEventListener("input", calculate);
+    }
+
+    // Remove Last Row with Popup
+    function removeLastRow() {
+      let tableBody = document.querySelector("#billingTable tbody");
+      let rowCount = tableBody.rows.length;
+      if (rowCount > 1) { // keep at least one row
+        let confirmDelete = confirm("Are you sure you want to remove the last item?");
+        if (confirmDelete) {
+          tableBody.deleteRow(rowCount - 1);
+          // Reset S.No
+          let updatedRows = tableBody.querySelectorAll("tr");
+          updatedRows.forEach((row, index) => {
+            row.querySelector(".sno").innerText = index + 1;
+          });
+          calculate();
+        }
+      }
+    }
+
+    function printInvoice() {
+      let invoiceNo = "INV-" + String(invoiceCounter).padStart(3, '0');
+      document.getElementById("invoice_no").innerText = invoiceNo;
+      window.print();
+      invoiceCounter++;
+      let nextInvoiceNo = "INV-" + String(invoiceCounter).padStart(3, '0');
+      document.getElementById("invoice_no").innerText = nextInvoiceNo;
+    }
+
+    // Save as JPG (80% size, with CORS safe)
+    function saveAsImage() {
+      const invoiceElement = document.getElementById("invoice");
+      html2canvas(invoiceElement, {scale:2, useCORS:true}).then(canvas => {
+        let targetWidth = canvas.width * 0.8;
+        let targetHeight = canvas.height * 0.8;
+        let resizedCanvas = document.createElement("canvas");
+        resizedCanvas.width = targetWidth;
+        resizedCanvas.height = targetHeight;
+        let ctx = resizedCanvas.getContext("2d");
+        ctx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+        let link = document.createElement("a");
+        link.download = "invoice.jpg";
+        link.href = resizedCanvas.toDataURL("image/jpeg", 1.0);
+        link.click();
+      }).catch(err => {
+        alert("Error saving image: " + err);
+      });
+    }
+
+    document.querySelector("input[name='unit']").addEventListener("input", calculate);
+    document.querySelector("input[name='rate']").addEventListener("input", calculate);
+    document.getElementById("back_dues").addEventListener("input", calculate);
+  </script>
+<script>
+  function checkPassword() {
+    const correctPassword = "457889"; // yahan apna password set karo
+    let userPassword = prompt("Enter Password to Access Billing System:");
+
+    if(userPassword === correctPassword) {
+      alert("Access Granted!");
+      // Agar password sahi hai to page normal load hoga
+    } else {
+      alert("Access Denied!");
+      // Agar galat password hai to user ko redirect kar do
+      window.location.href = "https://google.com";
+    }
+  }
+
+  // Page load hote hi popup khulega
+  window.onload = checkPassword;
+</script>
+
+</body>
+</html>

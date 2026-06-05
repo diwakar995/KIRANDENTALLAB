@@ -1,0 +1,145 @@
+ body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  margin: 20px;
+  line-height: 1.4;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #444;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.heading h1 {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 600;
+  color: #222;
+}
+
+.heading h2 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+  color: #555;
+}
+
+.logo-img {
+  height: 70px;
+}
+
+.company-info p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+label input {
+  padding: 5px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+}
+
+/* Billing Table with bold lines */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+table, th, td {
+  border: 1px solid #000;   /* bold black lines */
+}
+
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+th, td {
+  padding: 8px;
+  text-align: center;
+}
+
+/* Summary section */
+.summary {
+  margin-top: 20px;
+  text-align: right;
+  font-size: 13px;
+}
+.summary strong {
+  font-size: 14px;
+  color: #222;
+}
+
+/* Footer */
+.footer {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.qr-section {
+  text-align: left;
+}
+
+.qr {
+  height: 100px;
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* Print styling */
+@media print {
+  input {
+    border: none !important;
+    background: transparent !important;
+    color: #000 !important;
+    font-size: 12px;
+    padding: 0;
+  }
+
+  button {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  body {
+    margin: 0;
+    font-size: 12px;
+  }
+
+  table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .qr-section, .logo-img {
+    display: block !important;
+  }
+
+  /* Repeat table headings on each page */
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
+  }
+}
